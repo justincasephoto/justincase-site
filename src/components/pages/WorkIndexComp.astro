@@ -1,0 +1,124 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { t } from '../../i18n/utils';
+
+interface Props { lang: string; }
+const { lang } = Astro.props;
+const ui = t(lang);
+const base = `/${lang}`;
+
+const galleries = await getCollection('galleries');
+galleries.sort((a, b) => a.data.order - b.data.order);
+---
+
+<BaseLayout title={ui.work.title} description={ui.work.description} {lang}>
+  <div class="work-header section container">
+    <p class="eyebrow">{ui.work.subtitle}</p>
+    <h1 class="section-title">{ui.work.heading}</h1>
+  </div>
+
+  <div class="work-grid" role="list">
+    {galleries.map((g) => {
+      const slug = g.id;
+      const info = ui.work.galleries[slug as keyof typeof ui.work.galleries] ?? { title: g.data.title, description: g.data.description };
+      return (
+        <a
+          href={`${base}/work/${g.id}`}
+          class="gallery-card"
+          role="listitem"
+          style={`--cover: ${g.data.coverColor};`}
+          aria-label={info.title}
+        >
+          <div class="gallery-card-inner">
+            <p class="gallery-card-index">{String(g.data.order).padStart(2, '0')}</p>
+            <h2 class="gallery-card-title">{info.title}</h2>
+            <p class="gallery-card-desc">{info.description}</p>
+            <span class="gallery-card-arrow" aria-hidden="true">→</span>
+          </div>
+        </a>
+      );
+    })}
+  </div>
+</BaseLayout>
+
+<style>
+  .work-header { padding-bottom: 0; }
+
+  .work-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    margin-top: 3rem;
+  }
+
+  .gallery-card {
+    display: block;
+    background: var(--cover, var(--c-bg-2));
+    min-height: clamp(240px, 38vw, 420px);
+    position: relative;
+    overflow: hidden;
+    transition: background var(--t-mid);
+  }
+  .gallery-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid transparent;
+    transition: border-color var(--t-mid);
+    pointer-events: none;
+    z-index: 2;
+  }
+  .gallery-card:hover::after { border-color: var(--c-accent); }
+
+  .gallery-card-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: clamp(1.25rem, 4vw, 2.5rem);
+    background: linear-gradient(to top, rgba(8,8,8,0.75) 0%, transparent 60%);
+    z-index: 1;
+  }
+
+  .gallery-card-index {
+    font-family: var(--f-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--c-accent);
+    opacity: 0.7;
+    margin-bottom: 0.5rem;
+  }
+  .gallery-card-title {
+    font-family: var(--f-serif);
+    font-size: clamp(1.6rem, 3.5vw, 2.5rem);
+    font-weight: 300;
+    color: var(--c-text);
+    margin-bottom: 0.4rem;
+    line-height: 1.1;
+  }
+  .gallery-card-desc {
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    color: var(--c-text-muted);
+    margin-bottom: 1.25rem;
+  }
+  .gallery-card-arrow {
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    color: var(--c-accent);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity var(--t-fast), transform var(--t-fast);
+    display: inline-block;
+  }
+  .gallery-card:hover .gallery-card-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  @media (max-width: 640px) {
+    .work-grid { grid-template-columns: 1fr; }
+  }
+</style>

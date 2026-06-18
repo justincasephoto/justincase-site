@@ -1,0 +1,87 @@
+---
+import { t } from '../i18n/utils';
+
+interface Props { lang: string; }
+const { lang } = Astro.props;
+const ui = t(lang);
+const base = `/${lang}`;
+const year = new Date().getFullYear();
+const rights = ui.footer.rights.replace('{year}', String(year));
+---
+
+<footer class="footer">
+  <div class="footer-inner container">
+    <div class="footer-brand">
+      <span class="footer-logo">Justin Case</span>
+      <span class="footer-tagline">{ui.footer.tagline}</span>
+    </div>
+    <nav class="footer-nav" aria-label="Footer navigation">
+      <a href={`${base}/`}>Home</a>
+      <a href={`${base}/work`}>{ui.nav.work}</a>
+      <a href={`${base}/about`}>{ui.nav.about}</a>
+      <a href={`${base}/booking`}>{ui.nav.booking}</a>
+      <a href={`${base}/journal`}>{ui.nav.journal}</a>
+      <a href={`${base}/contact`}>{ui.nav.contact}</a>
+      <a href={`${base}/privacy`}>{ui.footer.privacy}</a>
+    </nav>
+    <p class="footer-copy">{rights}</p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--c-bg-2);
+    border-top: 1px solid var(--c-border);
+    padding-block: clamp(2.5rem, 6vw, 4rem);
+  }
+  .footer-inner {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 1.5rem 3rem;
+    align-items: start;
+  }
+  .footer-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .footer-logo {
+    font-family: var(--f-serif);
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--c-text);
+  }
+  .footer-tagline {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    color: var(--c-text-dim);
+    text-transform: uppercase;
+  }
+  .footer-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  .footer-nav a {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--c-text-dim);
+    transition: color var(--t-fast);
+  }
+  .footer-nav a:hover { color: var(--c-accent); }
+  .footer-copy {
+    grid-column: 1 / -1;
+    font-size: 0.65rem;
+    color: var(--c-text-dim);
+    letter-spacing: 0.05em;
+  }
+
+  @media (max-width: 600px) {
+    .footer-inner { grid-template-columns: 1fr; }
+    .footer-nav { justify-content: flex-start; }
+  }
+</style>

@@ -1,0 +1,120 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { t } from '../../i18n/utils';
+
+interface Props { lang: string; }
+const { lang } = Astro.props;
+const ui = t(lang);
+
+const paragraphs = ui.about.body.split('\n\n').filter(Boolean);
+---
+
+<BaseLayout title={ui.about.title} description={ui.about.description} {lang}>
+  <div class="about-page section container">
+    <p class="eyebrow">{lang === 'pl' ? 'Fotograf' : 'Photographer'}</p>
+    <h1 class="section-title">{ui.about.heading}</h1>
+    <div class="divider"></div>
+
+    <div class="about-layout">
+      <div class="about-photo-slot" aria-hidden="true">
+        <div class="about-photo-placeholder">
+          <!-- Replace with: <img src="/portrait.jpg" alt="Justin Case" class="about-photo" /> -->
+          <span class="about-photo-label">Portrait ↑</span>
+        </div>
+      </div>
+
+      <div class="about-text">
+        {paragraphs.map((p) => (
+          <p class="about-para">{p}</p>
+        ))}
+
+        <div class="about-meta">
+          <span class="about-meta-item">
+            <span class="about-meta-key">{lang === 'pl' ? 'Lokalizacja' : 'Location'}</span>
+            {ui.about.location}
+          </span>
+          <span class="about-meta-item">
+            <span class="about-meta-key">{lang === 'pl' ? 'Dostępność' : 'Availability'}</span>
+            {ui.about.available}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .about-page { padding-top: calc(var(--nav-h) + 3rem); }
+
+  .about-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: clamp(2rem, 6vw, 5rem);
+    align-items: start;
+    margin-top: 2rem;
+  }
+
+  .about-photo-slot { position: sticky; top: calc(var(--nav-h) + 2rem); }
+  .about-photo-placeholder {
+    aspect-ratio: 3 / 4;
+    background: var(--c-bg-3);
+    border: 1px solid var(--c-border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 1rem;
+  }
+  .about-photo-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--c-text-dim);
+    text-transform: uppercase;
+  }
+  :global(.about-photo) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .about-text { display: flex; flex-direction: column; gap: 0; }
+  .about-para {
+    font-size: 0.9rem;
+    line-height: 1.85;
+    color: var(--c-text-muted);
+    margin-bottom: 1.5rem;
+  }
+  .about-para:first-child {
+    font-family: var(--f-serif);
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    font-weight: 300;
+    color: var(--c-text);
+    line-height: 1.5;
+  }
+
+  .about-meta {
+    margin-top: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--c-border);
+  }
+  .about-meta-item {
+    font-size: 0.7rem;
+    color: var(--c-text-muted);
+    display: flex;
+    gap: 1.5rem;
+  }
+  .about-meta-key {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--c-text-dim);
+    min-width: 7rem;
+  }
+
+  @media (max-width: 768px) {
+    .about-layout { grid-template-columns: 1fr; }
+    .about-photo-slot { position: static; max-width: 280px; }
+  }
+</style>

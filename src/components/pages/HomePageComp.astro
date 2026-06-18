@@ -1,0 +1,108 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { t } from '../../i18n/utils';
+
+interface Props { lang: string; }
+const { lang } = Astro.props;
+const ui = t(lang);
+const base = `/${lang}`;
+---
+
+<BaseLayout title={ui.home.title} description={ui.meta.siteDescription} {lang}>
+  <section class="hero" aria-label="Hero">
+    <div class="hero-content">
+      <p class="hero-eyebrow">{ui.home.eyebrow}</p>
+      <h1 class="hero-name">Justin<br />Case</h1>
+      <p class="hero-tagline">{ui.home.tagline}</p>
+      <div class="hero-cta">
+        <a href={`${base}/work`} class="btn btn--accent">{ui.home.cta}</a>
+      </div>
+    </div>
+    <a class="hero-scroll" href="#" aria-hidden="true" tabindex="-1">↓</a>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(var(--nav-h) + 3rem) var(--pad-x) 5rem;
+    background:
+      radial-gradient(ellipse 90% 70% at 25% 55%, rgba(200, 169, 122, 0.055) 0%, transparent 65%),
+      radial-gradient(ellipse 70% 80% at 75% 30%, rgba(15, 8, 2, 0.6) 0%, transparent 55%),
+      var(--c-bg);
+    overflow: hidden;
+  }
+
+  /* Hero image slot — drop in a <img class="hero-bg"> or CSS background-image */
+  :global(.hero-bg) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: 0.3;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--f-mono);
+    font-size: 0.63rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--c-accent);
+    margin-bottom: 1.75rem;
+    opacity: 0.85;
+  }
+
+  .hero-name {
+    font-family: var(--f-serif);
+    font-size: clamp(4rem, 11vw, 10rem);
+    font-weight: 300;
+    letter-spacing: 0.07em;
+    line-height: 0.95;
+    color: var(--c-text);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+
+  .hero-tagline {
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--c-text-muted);
+    margin-bottom: 2.75rem;
+  }
+
+  .hero-cta { display: flex; gap: 1rem; }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--c-text-dim);
+    font-size: 1rem;
+    animation: bob 2.2s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes bob {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%       { transform: translateX(-50%) translateY(7px); }
+  }
+</style>

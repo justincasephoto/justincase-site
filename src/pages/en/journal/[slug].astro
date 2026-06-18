@@ -1,0 +1,15 @@
+---
+import { getCollection } from 'astro:content';
+import JournalPostComp from '../../../components/pages/JournalPostComp.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('journal', ({ data }) => data.lang === 'en');
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+---
+<JournalPostComp lang="en" {post} />

@@ -1,0 +1,55 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { t } from '../../i18n/utils';
+
+interface Props { lang: string; }
+const { lang } = Astro.props;
+const ui = t(lang);
+---
+
+<BaseLayout title={ui.prints.title} description={ui.prints.description} {lang}>
+  <div class="prints-page section container--narrow">
+    <p class="eyebrow">{lang === 'pl' ? 'Kolekcja' : 'Collection'}</p>
+    <h1 class="section-title">{ui.prints.heading}</h1>
+    <div class="divider"></div>
+
+    <p class="prints-intro">{ui.prints.intro}</p>
+
+    <div class="prints-coming-soon">
+      <p class="prints-soon-text">{ui.prints.comingSoon}</p>
+      <p class="prints-enquire-text">{ui.prints.enquire}</p>
+      <a href={ui.prints.ctaHref} class="btn btn--accent">{ui.prints.cta}</a>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .prints-page { padding-top: calc(var(--nav-h) + 3rem); }
+  .prints-intro {
+    font-size: 0.9rem;
+    line-height: 1.85;
+    color: var(--c-text-muted);
+    margin-bottom: 3rem;
+  }
+  .prints-coming-soon {
+    border: 1px solid var(--c-border);
+    padding: clamp(2rem, 8vw, 4rem);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  .prints-soon-text {
+    font-family: var(--f-serif);
+    font-size: 1.4rem;
+    font-weight: 300;
+    color: var(--c-text-muted);
+  }
+  .prints-enquire-text {
+    font-size: 0.75rem;
+    color: var(--c-text-dim);
+    max-width: 40ch;
+    line-height: 1.65;
+  }
+</style>

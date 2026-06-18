@@ -1,0 +1,84 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { t } from '../../i18n/utils';
+
+interface Props { lang: string; }
+const { lang } = Astro.props;
+const ui = t(lang);
+---
+
+<BaseLayout title={ui.privacy.title} description={ui.privacy.description} {lang}>
+  <div class="privacy-page section container--narrow">
+    <h1 class="section-title">{ui.privacy.heading}</h1>
+    {ui.privacy.subheading && ui.privacy.subheading !== ui.privacy.heading && (
+      <p class="privacy-sub">{ui.privacy.subheading}</p>
+    )}
+    <div class="divider"></div>
+
+    <div class="privacy-body prose">
+      <h2>1. Data Controller</h2>
+      <p>Justin Case Photography, Kraków, Poland.<br />
+      Email: <a href="mailto:thephotographerfromkrakow@gmail.com">thephotographerfromkrakow@gmail.com</a></p>
+
+      <h2>2. Data We Collect</h2>
+      <p>This website does not use tracking cookies, analytics scripts, or advertising pixels.
+      When you submit a booking enquiry via the Tally form, Tally.so processes your submission
+      according to their own privacy policy. We receive the submitted data by email.</p>
+
+      <h2>3. Cookies</h2>
+      <p>We store one first-party cookie / localStorage item (<code>cookie-ok</code>) to remember
+      that you have acknowledged this notice. No data is sent to third parties as a result of this cookie.</p>
+
+      <h2>4. Photography of Third Parties</h2>
+      <p>Street and event photographs may depict identifiable individuals. If you appear in a photograph
+      published on this site and wish it removed, please contact us directly. Requests will be processed
+      within 30 days in accordance with GDPR Article 17.</p>
+
+      <h2>5. Your Rights (GDPR / RODO)</h2>
+      <p>Under GDPR and Polish RODO you have the right to access, rectify, erase, or restrict processing
+      of your personal data. To exercise these rights, write to the email address above.</p>
+
+      <h2>6. Supervisory Authority</h2>
+      <p>You have the right to lodge a complaint with the Polish data protection authority (UODO):
+      <a href="https://uodo.gov.pl" target="_blank" rel="noopener noreferrer">uodo.gov.pl</a></p>
+
+      <hr />
+
+      <h2>1. Administrator danych</h2>
+      <p>Justin Case Photography, Kraków, Polska.<br />
+      Email: <a href="mailto:thephotographerfromkrakow@gmail.com">thephotographerfromkrakow@gmail.com</a></p>
+
+      <h2>2. Jakie dane gromadzimy</h2>
+      <p>Ta strona nie używa ciasteczek śledzących, skryptów analitycznych ani pikseli reklamowych.
+      Gdy wysyłasz zapytanie przez formularz Tally, Tally.so przetwarza Twoje zgłoszenie zgodnie
+      z własną polityką prywatności. Otrzymujemy przesłane dane na e-mail.</p>
+
+      <h2>3. Ciasteczka</h2>
+      <p>Przechowujemy jedno własne ciasteczko (<code>cookie-ok</code>) w localStorage, aby zapamiętać,
+      że zaakceptowałeś/aś tę informację. Żadne dane nie są wysyłane do stron trzecich.</p>
+
+      <h2>4. Fotografie osób trzecich</h2>
+      <p>Fotografie uliczne i eventowe mogą przedstawiać rozpoznawalne osoby. Jeśli widniejesz na
+      zdjęciu opublikowanym na tej stronie i chcesz je usunąć, skontaktuj się z nami bezpośrednio.
+      Wnioski będą rozpatrzone w ciągu 30 dni zgodnie z Art. 17 RODO.</p>
+
+      <h2>5. Twoje prawa (RODO)</h2>
+      <p>Na podstawie RODO masz prawo dostępu, sprostowania, usunięcia lub ograniczenia przetwarzania
+      danych osobowych. Aby skorzystać z tych praw, napisz na powyższy adres email.</p>
+
+      <h2>6. Organ nadzorczy</h2>
+      <p>Masz prawo złożyć skargę do Prezesa Urzędu Ochrony Danych Osobowych:
+      <a href="https://uodo.gov.pl" target="_blank" rel="noopener noreferrer">uodo.gov.pl</a></p>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .privacy-page { padding-top: calc(var(--nav-h) + 3rem); }
+  .privacy-sub {
+    font-size: 0.8rem;
+    color: var(--c-text-muted);
+    margin-top: 0.5rem;
+    letter-spacing: 0.05em;
+  }
+</style>

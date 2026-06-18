@@ -1,0 +1,15 @@
+---
+import { getCollection } from 'astro:content';
+import GalleryDetailComp from '../../../components/pages/GalleryDetailComp.astro';
+
+export async function getStaticPaths() {
+  const galleries = await getCollection('galleries');
+  return galleries.map((gallery) => ({
+    params: { gallery: gallery.id },
+    props: { gallery },
+  }));
+}
+
+const { gallery } = Astro.props;
+---
+<GalleryDetailComp lang="en" {gallery} />

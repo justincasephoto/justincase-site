@@ -1,0 +1,64 @@
+---
+import { t } from '../i18n/utils';
+interface Props { lang: string; }
+const { lang } = Astro.props;
+const ui = t(lang);
+---
+
+<div id="cookie-banner" class="cookie-banner" role="alert" aria-live="polite" hidden>
+  <p class="cookie-msg">{ui.cookie.message}</p>
+  <button id="cookie-ok" class="cookie-btn">{ui.cookie.accept}</button>
+</div>
+
+<script>
+  const banner = document.getElementById('cookie-banner') as HTMLElement | null;
+  const btn = document.getElementById('cookie-ok');
+  if (banner && !localStorage.getItem('cookie-ok')) {
+    banner.hidden = false;
+  }
+  btn?.addEventListener('click', () => {
+    localStorage.setItem('cookie-ok', '1');
+    if (banner) banner.hidden = true;
+  });
+</script>
+
+<style>
+  .cookie-banner {
+    position: fixed;
+    inset-block-end: 1.5rem;
+    inset-inline-start: 1.5rem;
+    z-index: 300;
+    max-width: min(26rem, calc(100vw - 3rem));
+    background: var(--c-bg-3);
+    border: 1px solid var(--c-border);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  }
+  .cookie-msg {
+    font-size: 0.7rem;
+    line-height: 1.5;
+    color: var(--c-text-muted);
+    flex: 1;
+  }
+  .cookie-btn {
+    font-family: var(--f-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--c-accent);
+    background: none;
+    border: 1px solid var(--c-border-acc);
+    padding: 0.45em 1em;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background var(--t-fast), color var(--t-fast);
+    flex-shrink: 0;
+  }
+  .cookie-btn:hover {
+    background: var(--c-accent);
+    color: var(--c-bg);
+  }
+</style>

@@ -1,0 +1,235 @@
+---
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import CookieBanner from '../components/CookieBanner.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  lang?: string;
+  noindex?: boolean;
+  ogImage?: string;
+}
+
+const {
+  title,
+  description,
+  lang = 'en',
+  noindex = false,
+  ogImage = '/og-image.jpg',
+} = Astro.props;
+
+const site = 'https://justincase.photo';
+const canonicalURL = new URL(Astro.url.pathname, site);
+const fullTitle = title === 'Justin Case' ? title : `${title} · Justin Case`;
+const ogLocale = lang === 'pl' ? 'pl_PL' : lang === 'es' ? 'es_ES' : lang === 'it' ? 'it_IT' : 'en_GB';
+---
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonicalURL} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    {noindex && <meta name="robots" content="noindex,nofollow" />}
+
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={`${site}${ogImage}`} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content={ogLocale} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap"
+      rel="stylesheet"
+    />
+
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": `${site}/#website`,
+          "url": site,
+          "name": "Justin Case Photography",
+          "inLanguage": ogLocale.replace('_', '-'),
+        },
+        {
+          "@type": ["LocalBusiness", "ProfessionalService"],
+          "@id": `${site}/#business`,
+          "name": "Justin Case Photography",
+          "url": site,
+          "image": `${site}/og-image.jpg`,
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Kraków",
+            "addressCountry": "PL",
+          },
+        },
+      ],
+    })} />
+  </head>
+  <body>
+    <Nav {lang} />
+    <main>
+      <slot />
+    </main>
+    <Footer {lang} />
+    <CookieBanner {lang} />
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --c-bg:          #080808;
+    --c-bg-2:        #0f0f0f;
+    --c-bg-3:        #181714;
+    --c-text:        #e8e2d9;
+    --c-text-muted:  #8a847d;
+    --c-text-dim:    #4e4a46;
+    --c-accent:      #c8a97a;
+    --c-accent-h:    #d4b98a;
+    --c-border:      rgba(232, 226, 217, 0.1);
+    --c-border-acc:  rgba(200, 169, 122, 0.25);
+
+    --f-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+    --f-mono:  'DM Mono', 'Courier New', monospace;
+
+    --nav-h:   3.5rem;
+    --max-w:   1280px;
+    --max-w-n: 720px;
+    --pad-x:   clamp(1.25rem, 5vw, 4rem);
+
+    --t-fast:  150ms ease;
+    --t-mid:   300ms ease;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+  body {
+    background: var(--c-bg);
+    color: var(--c-text);
+    font-family: var(--f-mono);
+    font-weight: 300;
+    font-size: 0.875rem;
+    line-height: 1.75;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--f-serif);
+    font-weight: 300;
+    line-height: 1.15;
+    letter-spacing: 0.01em;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  img, video { display: block; max-width: 100%; height: auto; }
+  main { min-height: 100vh; }
+
+  /* Utility classes */
+  .container {
+    max-width: var(--max-w);
+    margin-inline: auto;
+    padding-inline: var(--pad-x);
+  }
+
+  .container--narrow {
+    max-width: var(--max-w-n);
+    margin-inline: auto;
+    padding-inline: var(--pad-x);
+  }
+
+  .section { padding-block: clamp(4rem, 10vw, 8rem); }
+
+  .eyebrow {
+    font-family: var(--f-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--c-accent);
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: var(--f-serif);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 300;
+    margin-bottom: 0.35em;
+  }
+
+  .section-sub {
+    color: var(--c-text-muted);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 3rem;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.7em 1.8em;
+    border: 1px solid var(--c-border);
+    font-family: var(--f-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    background: transparent;
+    color: var(--c-text-muted);
+    transition: border-color var(--t-mid), color var(--t-mid), background var(--t-mid);
+  }
+  .btn:hover {
+    border-color: var(--c-accent);
+    color: var(--c-accent);
+  }
+  .btn--accent {
+    border-color: var(--c-accent);
+    color: var(--c-accent);
+  }
+  .btn--accent:hover {
+    background: var(--c-accent);
+    color: var(--c-bg);
+  }
+
+  /* Back link */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--c-text-muted);
+    transition: color var(--t-fast);
+    margin-bottom: 2.5rem;
+  }
+  .back-link:hover { color: var(--c-accent); }
+
+  /* Divider */
+  .divider {
+    width: 2rem;
+    height: 1px;
+    background: var(--c-accent);
+    margin-block: 2rem;
+    opacity: 0.5;
+  }
+</style>

@@ -1,0 +1,41 @@
+import type { UI } from './en';
+
+export const es: UI = {
+  meta: {
+    siteName: 'Justin Case',
+    siteDescription: 'Fotografía de arte de Cracovia, Polonia.',
+  },
+  nav: {
+    work: 'Trabajo',
+    about: 'Acerca de',
+    booking: 'Reservas',
+    prints: 'Copias',
+    journal: 'Blog',
+    contact: 'Contacto',
+    portraits: 'Retratos',
+    street: 'Calle',
+    jazz: 'Jazz y Música',
+    fineArt: 'Bellas Artes',
+    menu: 'Menú',
+    close: 'Cerrar menú',
+  },
+  home: {
+    title: 'Justin Case',
+    eyebrow: 'Fotografía',
+    tagline: 'Fotografía artística · Cracovia, Polonia',
+    cta: 'Ver trabajo',
+  },
+  work: { title: 'Trabajo', description: '', heading: 'Trabajo', subtitle: '', galleries: { portraits: { title: 'Retratos', description: '' }, street: { title: 'Calle', description: '' }, jazz: { title: 'Jazz y Música', description: '' }, 'fine-art': { title: 'Bellas Artes', description: '' } } },
+  gallery: { backToWork: '← Trabajo', noPhotos: 'Fotos próximamente.', noPhotosHint: '' },
+  about: { title: 'Acerca de', description: '', heading: 'Acerca de', body: '', location: 'Cracovia, Polonia', available: '' },
+  booking: { title: 'Reservas', description: '', heading: 'Reservas', intro: '', sessions: [], formTitle: '', formNote: '', tallyUrl: '' },
+  prints: { title: 'Copias', description: '', heading: 'Copias', intro: '', comingSoon: '', enquire: '', cta: '', ctaHref: '' },
+  journal: { title: 'Blog', description: '', heading: 'Blog', empty: '', readMore: 'Leer →', backToJournal: '← Blog' },
+  contact: { title: 'Contacto', description: '', heading: 'Contacto', email: 'thephotographerfromkrakow@gmail.com', instagram: '@thephotographerfromkrakow', instagramUrl: 'https://instagram.com/thephotographerfromkrakow', location: 'Cracovia, Polonia', bookingCta: '', bookingLink: '' },
+  privacy: { title: 'Privacidad', description: '', heading: 'Privacy Policy', subheading: 'Política de Privacidad' },
+  barePortraits: { title: 'Desnudos', description: '', ageGateHeading: '', ageGateBody: '', ageGateConfirm: '', ageGateDecline: '', heading: 'Desnudos', intro: '' },
+  cookie: { message: '', accept: 'Ok' },
+  footer: { rights: '© {year} Justin Case.', privacy: 'Privacidad', tagline: '' },
+  notFound: { title: '404', heading: '404', body: '', cta: 'Inicio' },
+  stub: { heading: 'Próximamente', body: 'Esta versión en español está en construcción.', cta: 'View in English →' },
+};

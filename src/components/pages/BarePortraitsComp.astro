@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AgeGate from '../AgeGate.astro';
+import { t } from '../../i18n/utils';
+
+interface Props { lang: string; }
+const { lang } = Astro.props;
+const ui = t(lang);
+---
+
+<BaseLayout title={ui.barePortraits.title} description={ui.barePortraits.description} {lang} noindex={true}>
+  <AgeGate {lang}>
+    <div class="bare-page section container--narrow">
+      <p class="eyebrow">18+</p>
+      <h1 class="section-title">{ui.barePortraits.heading}</h1>
+      <div class="divider"></div>
+      <p class="bare-intro">{ui.barePortraits.intro}</p>
+    </div>
+  </AgeGate>
+</BaseLayout>
+
+<style>
+  .bare-page { padding-top: calc(var(--nav-h) + 3rem); }
+  .bare-intro {
+    font-size: 0.9rem;
+    color: var(--c-text-muted);
+    line-height: 1.85;
+  }
+</style>

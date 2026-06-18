@@ -1,0 +1,166 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { t } from '../../i18n/utils';
+
+interface Props { lang: string; }
+const { lang } = Astro.props;
+const ui = t(lang);
+---
+
+<BaseLayout title={ui.booking.title} description={ui.booking.description} {lang}>
+  <div class="booking-page section container">
+    <p class="eyebrow">{lang === 'pl' ? 'Sesje' : 'Sessions'}</p>
+    <h1 class="section-title">{ui.booking.heading}</h1>
+    <div class="divider"></div>
+
+    <div class="booking-layout">
+      <div class="booking-info">
+        <p class="booking-intro">{ui.booking.intro}</p>
+
+        <div class="sessions" role="list">
+          {ui.booking.sessions.map((s, i) => (
+            <div class="session" role="listitem">
+              <div class="session-header">
+                <span class="session-num">{String(i + 1).padStart(2, '0')}</span>
+                <h2 class="session-name">{s.name}</h2>
+                <span class="session-duration">{s.duration}</span>
+              </div>
+              <p class="session-detail">{s.detail}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div class="booking-form-wrap">
+        <h2 class="form-title">{ui.booking.formTitle}</h2>
+        <div class="tally-wrap">
+          {ui.booking.tallyUrl && ui.booking.tallyUrl !== 'https://tally.so/r/PLACEHOLDER' ? (
+            <iframe
+              src={ui.booking.tallyUrl}
+              width="100%"
+              height="600"
+              frameborder="0"
+              marginheight="0"
+              marginwidth="0"
+              title={ui.booking.formTitle}
+              loading="lazy"
+              class="tally-iframe"
+            />
+          ) : (
+            <div class="tally-placeholder">
+              <p class="tally-placeholder-text">
+                {lang === 'pl'
+                  ? 'Formularz Tally będzie tu. Zastąp URL w BookingComp.astro.'
+                  : 'Tally form will go here. Replace the tallyUrl in src/i18n/en.ts.'}
+              </p>
+              <a href={`mailto:${ui.contact.email}`} class="btn btn--accent">
+                {lang === 'pl' ? 'Napisz email' : 'Send an email'}
+              </a>
+            </div>
+          )}
+        </div>
+        <p class="form-note">
+          {ui.booking.formNote}
+          {' '}
+          <a href={`mailto:${ui.contact.email}`} class="form-email">{ui.contact.email}</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .booking-page { padding-top: calc(var(--nav-h) + 3rem); }
+
+  .booking-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2rem, 6vw, 5rem);
+    align-items: start;
+    margin-top: 2rem;
+  }
+
+  .booking-intro {
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: var(--c-text-muted);
+    margin-bottom: 2.5rem;
+  }
+
+  .sessions { display: flex; flex-direction: column; gap: 0; }
+  .session {
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--c-border);
+  }
+  .session:first-child { border-top: 1px solid var(--c-border); }
+  .session-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .session-num {
+    font-family: var(--f-mono);
+    font-size: 0.6rem;
+    color: var(--c-accent);
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+  }
+  .session-name {
+    font-family: var(--f-serif);
+    font-size: 1.2rem;
+    font-weight: 400;
+    flex: 1;
+  }
+  .session-duration {
+    font-size: 0.65rem;
+    color: var(--c-text-muted);
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+  .session-detail {
+    font-size: 0.72rem;
+    color: var(--c-text-dim);
+    line-height: 1.65;
+    padding-left: calc(1ch + 1rem + 0.5rem);
+  }
+
+  .form-title {
+    font-family: var(--f-serif);
+    font-size: 1.5rem;
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+  }
+  .tally-iframe {
+    border: 1px solid var(--c-border);
+    background: var(--c-bg-2);
+  }
+  .tally-placeholder {
+    border: 1px solid var(--c-border);
+    padding: 3rem 2rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .tally-placeholder-text {
+    font-size: 0.75rem;
+    color: var(--c-text-dim);
+    line-height: 1.65;
+  }
+  .form-note {
+    margin-top: 1rem;
+    font-size: 0.7rem;
+    color: var(--c-text-dim);
+  }
+  .form-email {
+    color: var(--c-accent);
+    transition: opacity var(--t-fast);
+  }
+  .form-email:hover { opacity: 0.75; }
+
+  @media (max-width: 900px) {
+    .booking-layout { grid-template-columns: 1fr; }
+  }
+</style>

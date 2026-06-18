@@ -1,0 +1,117 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { t } from '../../i18n/utils';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  lang: string;
+  gallery: CollectionEntry<'galleries'>;
+}
+const { lang, gallery } = Astro.props;
+const ui = t(lang);
+const base = `/${lang}`;
+
+const slug = gallery.id as keyof typeof ui.work.galleries;
+const info = ui.work.galleries[slug] ?? { title: gallery.data.title, description: gallery.data.description };
+const titlePl = lang === 'pl' && gallery.data.titlePl ? gallery.data.titlePl : info.title;
+const descPl  = lang === 'pl' && gallery.data.descriptionPl ? gallery.data.descriptionPl : info.description;
+const displayTitle = lang === 'pl' ? titlePl : info.title;
+const displayDesc  = lang === 'pl' ? descPl  : info.description;
+
+const photos = gallery.data.photos ?? [];
+---
+
+<BaseLayout title={displayTitle} description={displayDesc} {lang}>
+  <div class="gallery-page section container">
+    <a href={`${base}/work`} class="back-link">{ui.gallery.backToWork}</a>
+
+    <header class="gallery-header">
+      <p class="eyebrow">{lang === 'pl' ? 'Seria' : 'Series'}</p>
+      <h1 class="section-title">{displayTitle}</h1>
+      {displayDesc && <p class="gallery-desc">{displayDesc}</p>}
+    </header>
+
+    {photos.length === 0 ? (
+      <div class="gallery-empty">
+        <p class="gallery-empty-msg">{ui.gallery.noPhotos}</p>
+        <p class="gallery-empty-hint">{ui.gallery.noPhotosHint}</p>
+      </div>
+    ) : (
+      <div class="photo-grid" role="list">
+        {photos.map((photo) => (
+          <figure class="photo-item" role="listitem">
+            <img
+              src={photo.src}
+              alt={photo.captionPl && lang === 'pl' ? photo.captionPl : (photo.caption ?? displayTitle)}
+              loading="lazy"
+              class="photo-img"
+              width={photo.width}
+              height={photo.height}
+            />
+            {photo.caption && (
+              <figcaption class="photo-caption">
+                {lang === 'pl' && photo.captionPl ? photo.captionPl : photo.caption}
+              </figcaption>
+            )}
+          </figure>
+        ))}
+      </div>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .gallery-page { padding-top: calc(var(--nav-h) + 3rem); }
+  .gallery-header { margin-bottom: 3rem; }
+  .gallery-desc {
+    color: var(--c-text-muted);
+    font-size: 0.8rem;
+    margin-top: 0.75rem;
+    max-width: 42ch;
+  }
+
+  .gallery-empty {
+    border: 1px solid var(--c-border);
+    padding: clamp(2rem, 8vw, 5rem) 2rem;
+    text-align: center;
+  }
+  .gallery-empty-msg {
+    font-family: var(--f-serif);
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--c-text-muted);
+    margin-bottom: 1rem;
+  }
+  .gallery-empty-hint {
+    font-size: 0.7rem;
+    color: var(--c-text-dim);
+    letter-spacing: 0.05em;
+    max-width: 50ch;
+    margin-inline: auto;
+  }
+
+  .photo-grid {
+    columns: 2;
+    column-gap: 4px;
+  }
+  .photo-item {
+    break-inside: avoid;
+    margin-bottom: 4px;
+    display: block;
+  }
+  .photo-img {
+    width: 100%;
+    display: block;
+    transition: opacity var(--t-mid);
+  }
+  .photo-img:hover { opacity: 0.92; }
+  .photo-caption {
+    font-size: 0.65rem;
+    color: var(--c-text-dim);
+    letter-spacing: 0.05em;
+    padding: 0.4rem 0 0.75rem;
+  }
+
+  @media (min-width: 1024px) { .photo-grid { columns: 3; } }
+  @media (max-width: 480px)  { .photo-grid { columns: 1; } }
+</style>

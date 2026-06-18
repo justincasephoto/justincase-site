@@ -1,0 +1,132 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { t } from '../../i18n/utils';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  lang: string;
+  post: CollectionEntry<'journal'>;
+}
+const { lang, post } = Astro.props;
+const ui = t(lang);
+const base = `/${lang}`;
+import { render } from 'astro:content';
+const { Content } = await render(post as any);
+
+const fmt = new Intl.DateTimeFormat(lang === 'pl' ? 'pl-PL' : 'en-GB', {
+  year: 'numeric', month: 'long', day: 'numeric',
+});
+---
+
+<BaseLayout title={post.data.title} description={post.data.description} {lang}>
+  <article class="post-page section container--narrow">
+    <a href={`${base}/journal`} class="back-link">{ui.journal.backToJournal}</a>
+
+    <header class="post-header">
+      <time class="post-date" datetime={post.data.pubDate.toISOString()}>
+        {fmt.format(post.data.pubDate)}
+      </time>
+      <h1 class="post-title">{post.data.title}</h1>
+      {post.data.tags.length > 0 && (
+        <div class="post-tags" aria-label="Tags">
+          {post.data.tags.map((tag) => (
+            <span class="post-tag">{tag}</span>
+          ))}
+        </div>
+      )}
+    </header>
+
+    <div class="divider"></div>
+
+    <div class="post-body prose">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .post-page { padding-top: calc(var(--nav-h) + 3rem); }
+
+  .post-header { margin-bottom: 0; }
+  .post-date {
+    display: block;
+    font-family: var(--f-mono);
+    font-size: 0.63rem;
+    letter-spacing: 0.12em;
+    color: var(--c-accent);
+    margin-bottom: 1rem;
+  }
+  .post-title {
+    font-family: var(--f-serif);
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 300;
+    line-height: 1.15;
+    margin-bottom: 1rem;
+  }
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  .post-tag {
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--c-text-dim);
+    border: 1px solid var(--c-border);
+    padding: 0.2em 0.7em;
+  }
+
+  /* Prose styles */
+  .prose { line-height: 1.85; }
+  .prose :global(p) {
+    font-size: 0.92rem;
+    color: var(--c-text-muted);
+    margin-bottom: 1.5rem;
+  }
+  .prose :global(h2) {
+    font-family: var(--f-serif);
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--c-text);
+    margin: 2.5rem 0 1rem;
+  }
+  .prose :global(h3) {
+    font-family: var(--f-serif);
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: var(--c-text);
+    margin: 2rem 0 0.75rem;
+  }
+  .prose :global(blockquote) {
+    border-left: 2px solid var(--c-accent);
+    padding-left: 1.5rem;
+    margin: 2rem 0;
+    font-family: var(--f-serif);
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--c-text-muted);
+  }
+  .prose :global(hr) {
+    border: none;
+    border-top: 1px solid var(--c-border);
+    margin: 2.5rem 0;
+  }
+  .prose :global(em) { font-style: italic; }
+  .prose :global(strong) { color: var(--c-text); font-weight: 400; }
+  .prose :global(a) {
+    color: var(--c-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: opacity var(--t-fast);
+  }
+  .prose :global(a:hover) { opacity: 0.75; }
+  .prose :global(ul), .prose :global(ol) {
+    padding-left: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--c-text-muted);
+    font-size: 0.88rem;
+  }
+  .prose :global(li) { margin-bottom: 0.4rem; }
+</style>

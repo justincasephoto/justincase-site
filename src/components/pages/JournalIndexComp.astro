@@ -1,0 +1,94 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { t } from '../../i18n/utils';
+
+interface Props { lang: string; }
+const { lang } = Astro.props;
+const ui = t(lang);
+const base = `/${lang}`;
+
+const allPosts = await getCollection('journal', ({ data }) => data.lang === lang);
+allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const fmt = new Intl.DateTimeFormat(lang === 'pl' ? 'pl-PL' : 'en-GB', {
+  year: 'numeric', month: 'long', day: 'numeric',
+});
+---
+
+<BaseLayout title={ui.journal.title} description={ui.journal.description} {lang}>
+  <div class="journal-page section container">
+    <p class="eyebrow">{lang === 'pl' ? 'Wpisy' : 'Posts'}</p>
+    <h1 class="section-title">{ui.journal.heading}</h1>
+    <div class="divider"></div>
+
+    {allPosts.length === 0 ? (
+      <p class="journal-empty">{ui.journal.empty}</p>
+    ) : (
+      <div class="post-list" role="list">
+        {allPosts.map((post) => (
+          <article class="post-card" role="listitem">
+            <a href={`${base}/journal/${post.slug}`} class="post-link">
+              <time class="post-date" datetime={post.data.pubDate.toISOString()}>
+                {fmt.format(post.data.pubDate)}
+              </time>
+              <h2 class="post-title">{post.data.title}</h2>
+              <p class="post-desc">{post.data.description}</p>
+              <span class="post-read">{ui.journal.readMore}</span>
+            </a>
+          </article>
+        ))}
+      </div>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .journal-page { padding-top: calc(var(--nav-h) + 3rem); }
+  .journal-empty { color: var(--c-text-muted); font-size: 0.85rem; margin-top: 2rem; }
+
+  .post-list { display: flex; flex-direction: column; gap: 0; }
+  .post-card {
+    border-bottom: 1px solid var(--c-border);
+  }
+  .post-link {
+    display: block;
+    padding: 2rem 0;
+    transition: padding-left var(--t-mid);
+  }
+  .post-link:hover { padding-left: 0.5rem; }
+
+  .post-date {
+    display: block;
+    font-family: var(--f-mono);
+    font-size: 0.63rem;
+    letter-spacing: 0.1em;
+    color: var(--c-accent);
+    margin-bottom: 0.6rem;
+  }
+  .post-title {
+    font-family: var(--f-serif);
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    font-weight: 300;
+    color: var(--c-text);
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+    transition: color var(--t-fast);
+  }
+  .post-link:hover .post-title { color: var(--c-accent); }
+  .post-desc {
+    font-size: 0.78rem;
+    color: var(--c-text-muted);
+    line-height: 1.65;
+    margin-bottom: 1rem;
+    max-width: 62ch;
+  }
+  .post-read {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--c-text-dim);
+    text-transform: uppercase;
+    transition: color var(--t-fast);
+  }
+  .post-link:hover .post-read { color: var(--c-accent); }
+</style>

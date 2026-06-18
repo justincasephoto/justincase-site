@@ -1,0 +1,83 @@
+---
+import { t } from '../i18n/utils';
+interface Props { lang: string; }
+const { lang } = Astro.props;
+const ui = t(lang);
+const exitHref = `/${lang}/`;
+---
+
+<div id="age-gate" class="age-gate">
+  <div class="age-gate-box">
+    <p class="age-gate-eyebrow">18+</p>
+    <h1 class="age-gate-heading">{ui.barePortraits.ageGateHeading}</h1>
+    <p class="age-gate-body">{ui.barePortraits.ageGateBody}</p>
+    <div class="age-gate-actions">
+      <button id="age-confirm" class="btn btn--accent">{ui.barePortraits.ageGateConfirm}</button>
+      <a href={exitHref} class="btn">{ui.barePortraits.ageGateDecline}</a>
+    </div>
+  </div>
+</div>
+
+<div id="age-content" style="display:none">
+  <slot />
+</div>
+
+<script>
+  const gate = document.getElementById('age-gate') as HTMLElement | null;
+  const content = document.getElementById('age-content') as HTMLElement | null;
+  if (gate && content && localStorage.getItem('age-ok') === '1') {
+    gate.style.display = 'none';
+    content.style.display = 'block';
+  }
+  document.getElementById('age-confirm')?.addEventListener('click', () => {
+    localStorage.setItem('age-ok', '1');
+    if (gate) gate.style.display = 'none';
+    if (content) content.style.display = 'block';
+  });
+</script>
+
+<style>
+  .age-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    background: var(--c-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--pad-x);
+  }
+  .age-gate-box {
+    max-width: 28rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+  }
+  .age-gate-eyebrow {
+    font-family: var(--f-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--c-accent);
+  }
+  .age-gate-heading {
+    font-family: var(--f-serif);
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 300;
+    color: var(--c-text);
+  }
+  .age-gate-body {
+    font-size: 0.8rem;
+    line-height: 1.65;
+    color: var(--c-text-muted);
+  }
+  .age-gate-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
+</style>

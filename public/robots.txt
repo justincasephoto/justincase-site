@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Exclude age-gated content from indexing
+Disallow: /en/bare-portraits
+Disallow: /pl/bare-portraits
+
+Sitemap: https://justincase.photo/sitemap-index.xml

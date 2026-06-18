@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { t } from '../../i18n/utils';
+const ui = t('it');
+---
+<BaseLayout title={ui.stub.heading} description={ui.meta.siteDescription} lang="it">
+  <div class="stub section container--narrow">
+    <h1 class="section-title">{ui.stub.heading}</h1>
+    <p class="stub-body">{ui.stub.body}</p>
+    <a href="/en/" class="btn btn--accent">{ui.stub.cta}</a>
+  </div>
+</BaseLayout>
+<style>
+  .stub { padding-top: calc(var(--nav-h) + 4rem); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+  .stub-body { font-size: 0.85rem; color: var(--c-text-muted); }
+</style>
