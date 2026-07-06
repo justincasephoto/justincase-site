@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import BookingBanner from '../../components/BookingBanner.astro';
 import { t } from '../../i18n/utils';
 
 interface Props { lang: string; }
@@ -14,10 +15,26 @@ const base = `/${lang}`;
       <p class="hero-eyebrow">{ui.home.eyebrow}</p>
       <h1 class="hero-name">Justin<br />Case</h1>
       <p class="hero-tagline">{ui.home.tagline}</p>
+
+      <a class="offer-badge" href={`${base}/booking`} aria-label={`${ui.home.offerBadge} — ${ui.bookingBanner.cta}`}>
+        <span class="offer-badge-dot" aria-hidden="true"></span>
+        <span class="offer-badge-text">{ui.home.offerBadge}</span>
+      </a>
+
       <div class="hero-cta">
-        <a href={`${base}/work`} class="btn btn--accent">{ui.home.cta}</a>
+        <a href={`${base}/booking`} class="btn btn--primary btn--shimmer">
+          {ui.home.ctaBook}
+        </a>
+        <a href={`${base}/work`} class="btn btn--ghost">{ui.home.cta}</a>
       </div>
     </div>
+
+    <div class="hero-banner-strip">
+      <div class="hero-banner-strip-inner">
+        <BookingBanner {lang} variant="compact" />
+      </div>
+    </div>
+
     <a class="hero-scroll" href="#" aria-hidden="true" tabindex="-1">↓</a>
   </section>
 </BaseLayout>
@@ -37,7 +54,7 @@ const base = `/${lang}`;
     overflow: hidden;
   }
 
-  /* Hero image slot — drop in a <img class="hero-bg"> or CSS background-image */
+  /* Hero image slot */
   :global(.hero-bg) {
     position: absolute;
     inset: 0;
@@ -85,14 +102,126 @@ const base = `/${lang}`;
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--c-text-muted);
-    margin-bottom: 2.75rem;
+    margin-bottom: 1.75rem;
   }
 
-  .hero-cta { display: flex; gap: 1rem; }
+  /* Offer badge (small pulsing pill above CTAs) */
+  .offer-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--c-border-acc);
+    border-radius: 999px;
+    background: rgba(200, 169, 122, 0.06);
+    font-family: var(--f-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--c-accent);
+    margin-bottom: 2rem;
+    transition: background var(--t-mid), border-color var(--t-mid), transform var(--t-mid);
+  }
+  .offer-badge:hover {
+    background: rgba(200, 169, 122, 0.14);
+    border-color: var(--c-accent);
+    transform: translateY(-1px);
+  }
+  .offer-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--c-accent);
+    box-shadow: 0 0 0 0 rgba(200, 169, 122, 0.6);
+    animation: badge-pulse 2s ease-in-out infinite;
+  }
+  @keyframes badge-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(200, 169, 122, 0.55); }
+    70%  { box-shadow: 0 0 0 8px rgba(200, 169, 122, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(200, 169, 122, 0); }
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Primary (filled accent) button with shimmer */
+  :global(.btn--primary) {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--c-accent) 0%, var(--c-accent-h) 100%);
+    border-color: var(--c-accent);
+    color: #1a1206;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    padding: 0.9em 2em;
+    transition: transform var(--t-mid), box-shadow var(--t-mid), border-color var(--t-mid);
+    box-shadow:
+      0 6px 20px -6px rgba(200, 169, 122, 0.5),
+      0 0 0 0 rgba(200, 169, 122, 0);
+  }
+  :global(.btn--primary:hover) {
+    background: linear-gradient(135deg, var(--c-accent-h) 0%, #e0c799 100%);
+    color: #1a1206;
+    transform: translateY(-2px);
+    box-shadow:
+      0 12px 30px -8px rgba(200, 169, 122, 0.65),
+      0 0 0 4px rgba(200, 169, 122, 0.12);
+  }
+  :global(.btn--shimmer)::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      110deg,
+      transparent 0%,
+      transparent 40%,
+      rgba(255, 240, 210, 0.55) 50%,
+      transparent 60%,
+      transparent 100%
+    );
+    background-size: 250% 100%;
+    background-position: -60% 0;
+    animation: btn-shimmer 3.6s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes btn-shimmer {
+    0%   { background-position: -60% 0; }
+    45%  { background-position: 160% 0; }
+    100% { background-position: 160% 0; }
+  }
+
+  :global(.btn--ghost) {
+    background: transparent;
+    border-color: var(--c-border);
+    color: var(--c-text-muted);
+  }
+  :global(.btn--ghost:hover) {
+    border-color: var(--c-text);
+    color: var(--c-text);
+    background: transparent;
+  }
+
+  /* Hero-bottom banner strip (visible when scrolling begins) */
+  .hero-banner-strip {
+    position: absolute;
+    inset: auto 0 5rem;
+    z-index: 1;
+    padding: 0 var(--pad-x);
+    pointer-events: none;
+  }
+  .hero-banner-strip-inner {
+    max-width: 640px;
+    margin-inline: auto;
+    pointer-events: auto;
+  }
 
   .hero-scroll {
     position: absolute;
-    bottom: 2rem;
+    bottom: 1.5rem;
     left: 50%;
     transform: translateX(-50%);
     color: var(--c-text-dim);
@@ -100,9 +229,26 @@ const base = `/${lang}`;
     animation: bob 2.2s ease-in-out infinite;
     pointer-events: none;
   }
-
   @keyframes bob {
     0%, 100% { transform: translateX(-50%) translateY(0); }
     50%       { transform: translateX(-50%) translateY(7px); }
+  }
+
+  @media (max-width: 640px) {
+    .hero-cta { flex-direction: column; width: 100%; max-width: 20rem; }
+    .hero-cta :global(.btn) { justify-content: center; }
+    .hero-banner-strip { position: static; padding-top: 3rem; padding-bottom: 0; }
+    .hero-scroll { display: none; }
+  }
+
+  @media (max-height: 720px) and (min-width: 641px) {
+    .hero-banner-strip { position: static; margin-top: 3rem; }
+    .hero-scroll { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.btn--shimmer)::before { animation: none; }
+    .offer-badge-dot { animation: none; }
+    .hero-scroll { animation: none; }
   }
 </style>

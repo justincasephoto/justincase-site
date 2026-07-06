@@ -33,4 +33,20 @@ const journal = defineCollection({
   }),
 });
 
-export const collections = { galleries, journal };
+const portfolios = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/portfolios' }),
+  schema: z.object({
+    handle: z.string(),
+    type: z.enum(['story', 'post', 'colab']),
+    approvedEmails: z.array(z.string()).default([]),
+    sessionDate: z.string().optional(),
+    location: z.string().optional(),
+    contentUrl: z.string().optional(),
+    photos: z.array(z.object({
+      id: z.number(),
+      driveId: z.string(),
+    })).default([]),
+  }),
+});
+
+export const collections = { galleries, journal, portfolios };

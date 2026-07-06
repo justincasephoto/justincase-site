@@ -1,0 +1,827 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BookingBanner from '../../components/BookingBanner.astro';
+import { t } from '../../i18n/utils';
+import { getCollection } from 'astro:content';
+
+interface Props { lang: string; }
+const { lang } = Astro.props;
+const ui = t(lang);
+
+const LIMITS = { story: 3, post: 5, colab: 10 };
+
+const portfolios = await getCollection('portfolios');
+
+const portfolioData = portfolios.map((p) => ({
+  handle: p.data.handle.toLowerCase(),
+  type: p.data.type,
+  limit: LIMITS[p.data.type],
+  approvedEmails: p.data.approvedEmails.map((e) => e.toLowerCase()),
+  photos: p.data.photos.map((ph) => ({
+    id: ph.id,
+    thumb: `https://drive.google.com/thumbnail?id=${ph.driveId}&sz=w600`,
+    driveId: ph.driveId,
+  })),
+}));
+
+const WEBHOOK_URL = 'REPLACE_WITH_APPS_SCRIPT_WEBHOOK_URL';
+---
+
+<BaseLayout title={ui.portfolio.title} description={ui.portfolio.description} {lang} noindex={true}>
+  <div class="portfolio-page section container">
+    <p class="eyebrow">{ui.portfolio.eyebrow}</p>
+    <h1 class="section-title">{ui.portfolio.heading}</h1>
+    <div class="divider"></div>
+
+    <!-- Gate -->
+    <section class="pf-gate" id="pf-gate">
+      <h2 class="pf-gate-heading">{ui.portfolio.gateHeading}</h2>
+      <p class="pf-gate-body">{ui.portfolio.gateBody}</p>
+
+      <form class="pf-form" id="pf-form" novalidate>
+        <label class="pf-field">
+          <span class="pf-label">{ui.portfolio.handleLabel}</span>
+          <div class="pf-input-wrap">
+            <span class="pf-input-prefix">@</span>
+            <input
+              type="text"
+              name="handle"
+              id="pf-handle"
+              class="pf-input pf-input--handle"
+              placeholder={ui.portfolio.handlePlaceholder}
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              required
+            />
+          </div>
+        </label>
+
+        <label class="pf-field">
+          <span class="pf-label">{ui.portfolio.emailLabel}</span>
+          <input
+            type="email"
+            name="email"
+            id="pf-email"
+            class="pf-input"
+            placeholder={ui.portfolio.emailPlaceholder}
+            autocomplete="email"
+            autocapitalize="off"
+            spellcheck="false"
+            required
+          />
+        </label>
+
+        <label class="pf-field">
+          <span class="pf-label">{ui.portfolio.linkLabel}</span>
+          <input
+            type="url"
+            name="link"
+            id="pf-link"
+            class="pf-input"
+            placeholder={ui.portfolio.linkPlaceholder}
+            autocomplete="off"
+            required
+          />
+        </label>
+
+        <fieldset class="pf-field pf-field--radios">
+          <legend class="pf-label">{ui.portfolio.typeLabel}</legend>
+          <label class="pf-radio">
+            <input type="radio" name="type" value="story" />
+            <span>{ui.portfolio.typeStory}</span>
+          </label>
+          <label class="pf-radio">
+            <input type="radio" name="type" value="post" checked />
+            <span>{ui.portfolio.typePost}</span>
+          </label>
+          <label class="pf-radio">
+            <input type="radio" name="type" value="colab" />
+            <span>{ui.portfolio.typeColab}</span>
+          </label>
+        </fieldset>
+
+        <p class="pf-error" id="pf-error" role="alert" aria-live="polite"></p>
+
+        <button type="submit" class="btn btn--accent pf-submit" id="pf-submit">{ui.portfolio.enterBtn}</button>
+      </form>
+    </section>
+
+    <!-- Pending review -->
+    <section class="pf-pending" id="pf-pending" hidden>
+      <div class="pf-pending-icon" aria-hidden="true">⧗</div>
+      <h2 class="pf-pending-heading">{ui.portfolio.pendingHeading}</h2>
+      <p class="pf-pending-body">{ui.portfolio.pendingBody}</p>
+      <p class="pf-pending-return">{ui.portfolio.pendingReturn}</p>
+      <p class="pf-error" id="pf-error-pending" role="alert" aria-live="polite"></p>
+      <button type="button" class="btn btn--accent" id="pf-check-again">{ui.portfolio.checkAgainBtn}</button>
+      <button type="button" class="pf-start-over" id="pf-start-over">{ui.portfolio.startOver}</button>
+      <div class="pf-pending-banner">
+        <BookingBanner {lang} />
+      </div>
+    </section>
+
+    <!-- Collage (only for approved emails) -->
+    <section class="pf-collage-section" id="pf-collage-section" hidden>
+      <div class="pf-collage-header">
+        <div>
+          <h2 class="pf-collage-heading">{ui.portfolio.collageHeading}</h2>
+          <p class="pf-limit-label" id="pf-limit-label"></p>
+        </div>
+        <p class="pf-selected-count" id="pf-selected-count"></p>
+      </div>
+
+      <p class="pf-hint">{ui.portfolio.tapToSelect}</p>
+
+      <p class="pf-auth-notice" id="pf-auth-notice" hidden></p>
+
+      <div class="pf-collage" id="pf-collage" role="list"></div>
+
+      <div class="pf-banner-wrap">
+        <BookingBanner {lang} />
+      </div>
+
+      <p class="pf-verify-reminder">{ui.portfolio.verifyReminder}</p>
+
+      <p class="pf-error" id="pf-error-save" role="alert" aria-live="polite"></p>
+
+      <button type="button" class="btn btn--accent btn--save pf-save" id="pf-save">
+        {ui.portfolio.saveBtn}
+      </button>
+    </section>
+
+    <!-- Saved (final state) -->
+    <section class="pf-saved" id="pf-saved" hidden>
+      <div class="pf-saved-check" aria-hidden="true">✓</div>
+      <h2 class="pf-saved-heading">{ui.portfolio.savedHeading}</h2>
+      <p class="pf-saved-body">{ui.portfolio.savedBody}</p>
+      <p class="pf-saved-locked">{ui.portfolio.savedLocked}</p>
+      <div class="pf-saved-banner">
+        <BookingBanner {lang} />
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<script is:inline define:vars={{ portfolioData, WEBHOOK_URL, lang, strings: ui.portfolio }}>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const els = {
+    gate: $('pf-gate'),
+    form: $('pf-form'),
+    handle: $('pf-handle'),
+    email: $('pf-email'),
+    link: $('pf-link'),
+    submit: $('pf-submit'),
+    error: $('pf-error'),
+    errorPending: $('pf-error-pending'),
+    errorSave: $('pf-error-save'),
+    pending: $('pf-pending'),
+    checkAgain: $('pf-check-again'),
+    startOver: $('pf-start-over'),
+    collageSection: $('pf-collage-section'),
+    collage: $('pf-collage'),
+    authNotice: $('pf-auth-notice'),
+    limitLabel: $('pf-limit-label'),
+    selectedCount: $('pf-selected-count'),
+    save: $('pf-save'),
+    saved: $('pf-saved'),
+  };
+
+  const SAVED_KEY = 'jc_portfolio_saved_v1';
+  const PENDING_KEY = 'jc_portfolio_pending_v1';
+
+  let state = { handle: '', email: '', link: '', type: 'post', limit: 5, photos: [], selected: new Set(), locked: false };
+
+  const normalize = (v) => String(v || '').trim().toLowerCase();
+  const normalizeHandle = (v) => normalize(v).replace(/^@+/, '');
+  const isProbablyUrl = (v) => { try { new URL(v); return true; } catch (_) { return false; } };
+  const isProbablyEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+  const fillTpl = (tpl, vars) => String(tpl).replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? '');
+
+  const readJSON = (key) => {
+    try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (_) { return null; }
+  };
+  const writeJSON = (key, val) => {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch (_) { /* ignore */ }
+  };
+
+  function show(section) {
+    [els.gate, els.pending, els.collageSection, els.saved].forEach((s) => { s.hidden = s !== section; });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function setError(el, msg) {
+    el.textContent = msg;
+    el.style.opacity = msg ? '1' : '0';
+  }
+
+  function findPortfolio(handle) {
+    const h = normalizeHandle(handle);
+    return portfolioData.find((p) => p.handle === h);
+  }
+
+  function isApproved(pf, email) {
+    return pf.approvedEmails.includes(normalize(email));
+  }
+
+  async function postWebhook(payload) {
+    if (WEBHOOK_URL && !WEBHOOK_URL.startsWith('REPLACE_')) {
+      await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      console.warn('[portfolio] WEBHOOK_URL not configured; payload =', payload);
+    }
+  }
+
+  function updateSelectedCount() {
+    els.selectedCount.textContent = fillTpl(strings.selectedCount, { n: state.selected.size, max: state.limit });
+    const atLimit = state.selected.size >= state.limit;
+    els.collage.querySelectorAll('.pf-photo').forEach((btn) => {
+      const id = Number(btn.dataset.id);
+      btn.classList.toggle('pf-photo--disabled', atLimit && !state.selected.has(id));
+    });
+  }
+
+  function renderCollage() {
+    els.collage.innerHTML = '';
+    let failedImgs = 0;
+    state.photos.forEach((p) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pf-photo';
+      btn.dataset.id = String(p.id);
+      btn.setAttribute('role', 'listitem');
+      btn.setAttribute('aria-pressed', 'false');
+      btn.innerHTML = `
+        <span class="pf-photo-frame">
+          <img
+            src="${p.thumb}"
+            alt="Photo ${p.id}"
+            loading="lazy"
+            draggable="false"
+            oncontextmenu="return false"
+            class="pf-photo-img"
+          />
+          <span class="pf-photo-overlay" aria-hidden="true"></span>
+          <span class="pf-photo-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+        </span>
+      `;
+      const img = btn.querySelector('img');
+      img.addEventListener('error', () => {
+        failedImgs++;
+        // Private Drive files 403 when the browser lacks a Google session with the approved email
+        if (failedImgs >= 1) {
+          els.authNotice.textContent = fillTpl(strings.imgAuthNotice, { email: state.email });
+          els.authNotice.hidden = false;
+        }
+      });
+      btn.addEventListener('click', () => togglePhoto(p.id, btn));
+      els.collage.appendChild(btn);
+    });
+  }
+
+  function togglePhoto(id, btn) {
+    if (state.locked) return;
+    if (state.selected.has(id)) {
+      state.selected.delete(id);
+      btn.classList.remove('pf-photo--selected');
+      btn.setAttribute('aria-pressed', 'false');
+    } else {
+      if (state.selected.size >= state.limit) return;
+      state.selected.add(id);
+      btn.classList.add('pf-photo--selected');
+      btn.setAttribute('aria-pressed', 'true');
+    }
+    updateSelectedCount();
+  }
+
+  function enterCollage(pf, email, link) {
+    state.handle = pf.handle;
+    state.email = normalize(email);
+    state.link = link;
+    state.type = pf.type;
+    state.limit = pf.limit;
+    state.photos = pf.photos;
+    state.selected = new Set();
+    state.locked = false;
+
+    els.limitLabel.textContent = fillTpl(strings.limitLabel, { n: pf.limit });
+    els.authNotice.hidden = true;
+    updateSelectedCount();
+    renderCollage();
+    show(els.collageSection);
+  }
+
+  // ---- Init: restore saved / pending state --------------------------------
+  const savedState = readJSON(SAVED_KEY);
+  if (savedState && savedState.handle) {
+    show(els.saved);
+    return;
+  }
+
+  const pendingState = readJSON(PENDING_KEY);
+  if (pendingState && pendingState.handle && pendingState.email) {
+    const pf = findPortfolio(pendingState.handle);
+    if (pf && isApproved(pf, pendingState.email)) {
+      // Approved since last visit (site was rebuilt with their email)
+      enterCollage(pf, pendingState.email, pendingState.link || '');
+    } else {
+      show(els.pending);
+    }
+  }
+
+  // ---- Gate submit --------------------------------------------------------
+  els.form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    setError(els.error, '');
+
+    const handle = normalizeHandle(els.handle.value);
+    const email = normalize(els.email.value);
+    const link = String(els.link.value || '').trim();
+    const typeInput = els.form.querySelector('input[name="type"]:checked');
+    const declaredType = typeInput ? typeInput.value : 'post';
+
+    if (!handle) { setError(els.error, strings.requiredHandle); return; }
+    if (!email) { setError(els.error, strings.requiredEmail); return; }
+    if (!isProbablyEmail(email)) { setError(els.error, strings.invalidEmail); return; }
+    if (!link) { setError(els.error, strings.requiredLink); return; }
+    if (!isProbablyUrl(link)) { setError(els.error, strings.invalidLink); return; }
+
+    const pf = findPortfolio(handle);
+    if (!pf) {
+      setError(els.error, fillTpl(strings.notFound, { handle }));
+      return;
+    }
+
+    if (isApproved(pf, email)) {
+      enterCollage(pf, email, link);
+      return;
+    }
+
+    // Not approved yet → send access request, show pending
+    els.submit.disabled = true;
+    try {
+      await postWebhook({
+        kind: 'access_request',
+        handle,
+        email,
+        link,
+        declaredType,
+        lang,
+        ts: new Date().toISOString(),
+        ua: navigator.userAgent,
+      });
+      writeJSON(PENDING_KEY, { handle, email, link, declaredType, ts: new Date().toISOString() });
+      show(els.pending);
+    } catch (err) {
+      setError(els.error, strings.errorNetwork);
+    } finally {
+      els.submit.disabled = false;
+    }
+  });
+
+  // ---- Pending actions ----------------------------------------------------
+  els.checkAgain.addEventListener('click', () => {
+    // A fresh page load picks up the rebuilt approved list
+    setError(els.errorPending, '');
+    const p = readJSON(PENDING_KEY);
+    const pf = p ? findPortfolio(p.handle) : null;
+    if (pf && isApproved(pf, p.email)) {
+      enterCollage(pf, p.email, p.link || '');
+    } else {
+      setError(els.errorPending, strings.stillPending);
+      setTimeout(() => location.reload(), 1200);
+    }
+  });
+
+  els.startOver.addEventListener('click', () => {
+    try { localStorage.removeItem(PENDING_KEY); } catch (_) { /* ignore */ }
+    show(els.gate);
+  });
+
+  // ---- Save favorites -----------------------------------------------------
+  els.save.addEventListener('click', async () => {
+    if (state.locked) return;
+    setError(els.errorSave, '');
+    if (state.selected.size === 0) { setError(els.errorSave, strings.minFavorite); return; }
+
+    els.save.disabled = true;
+    els.save.textContent = strings.savingBtn;
+    state.locked = true;
+    els.collage.querySelectorAll('.pf-photo').forEach((b) => b.classList.add('pf-photo--locked'));
+
+    const payload = {
+      kind: 'favorites',
+      handle: state.handle,
+      email: state.email,
+      link: state.link,
+      type: state.type,
+      limit: state.limit,
+      favorites: [...state.selected].map((id) => {
+        const p = state.photos.find((x) => x.id === id);
+        return { id, driveId: p ? p.driveId : null };
+      }),
+      lang,
+      ts: new Date().toISOString(),
+      ua: navigator.userAgent,
+    };
+
+    try {
+      await postWebhook(payload);
+      writeJSON(SAVED_KEY, {
+        handle: state.handle,
+        email: state.email,
+        ts: payload.ts,
+        favorites: payload.favorites.map((f) => f.id),
+      });
+      try { localStorage.removeItem(PENDING_KEY); } catch (_) { /* ignore */ }
+      show(els.saved);
+    } catch (err) {
+      setError(els.errorSave, strings.errorNetwork);
+      els.save.disabled = false;
+      els.save.textContent = strings.saveBtn;
+      state.locked = false;
+      els.collage.querySelectorAll('.pf-photo').forEach((b) => b.classList.remove('pf-photo--locked'));
+    }
+  });
+})();
+</script>
+
+<style>
+  .portfolio-page {
+    padding-top: calc(var(--nav-h) + 3rem);
+    max-width: 900px;
+    margin-inline: auto;
+  }
+
+  /* Gate */
+  .pf-gate { max-width: 34rem; margin-inline: auto; }
+  .pf-gate-heading {
+    font-family: var(--f-serif);
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    font-weight: 300;
+    margin-bottom: 1rem;
+  }
+  .pf-gate-body {
+    color: var(--c-text-muted);
+    font-size: 0.8rem;
+    line-height: 1.75;
+    margin-bottom: 2.25rem;
+  }
+
+  .pf-form { display: flex; flex-direction: column; gap: 1.5rem; }
+
+  .pf-field { display: flex; flex-direction: column; gap: 0.4rem; }
+  .pf-field--radios { border: none; padding: 0; }
+  .pf-label {
+    font-family: var(--f-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--c-text-muted);
+  }
+
+  .pf-input-wrap { position: relative; display: flex; align-items: center; }
+  .pf-input-prefix {
+    position: absolute;
+    left: 0.9rem;
+    color: var(--c-text-dim);
+    font-family: var(--f-mono);
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+  .pf-input {
+    width: 100%;
+    background: var(--c-bg-2);
+    border: 1px solid var(--c-border);
+    color: var(--c-text);
+    font-family: var(--f-mono);
+    font-size: 0.85rem;
+    padding: 0.85rem 1rem;
+    transition: border-color var(--t-fast);
+    border-radius: 2px;
+  }
+  .pf-input:focus {
+    outline: none;
+    border-color: var(--c-accent);
+  }
+  .pf-input--handle { padding-left: 2rem; }
+
+  .pf-radio {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    cursor: pointer;
+    padding: 0.4rem 0;
+    font-family: var(--f-mono);
+    font-size: 0.75rem;
+    color: var(--c-text-muted);
+    letter-spacing: 0.02em;
+  }
+  .pf-radio input {
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--c-border);
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: border-color var(--t-fast);
+    margin: 0;
+  }
+  .pf-radio input:checked { border-color: var(--c-accent); }
+  .pf-radio input:checked::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: var(--c-accent);
+    border-radius: 50%;
+  }
+  .pf-radio:has(input:checked) { color: var(--c-text); }
+
+  .pf-error {
+    color: #d17a7a;
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    line-height: 1.5;
+    opacity: 0;
+    transition: opacity var(--t-fast);
+    min-height: 1.5em;
+  }
+
+  .pf-submit { align-self: flex-start; margin-top: 0.5rem; }
+  .pf-submit:disabled { opacity: 0.5; cursor: default; }
+
+  /* Pending */
+  .pf-pending {
+    text-align: center;
+    max-width: 34rem;
+    margin-inline: auto;
+    padding-top: 1rem;
+  }
+  .pf-pending-icon {
+    font-size: 2.5rem;
+    color: var(--c-accent);
+    margin-bottom: 1.5rem;
+    animation: pf-pending-spin 6s linear infinite;
+    display: inline-block;
+  }
+  @keyframes pf-pending-spin {
+    0%, 80%  { transform: rotate(0deg); }
+    90%, 100% { transform: rotate(180deg); }
+  }
+  .pf-pending-heading {
+    font-family: var(--f-serif);
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 300;
+    margin-bottom: 1rem;
+  }
+  .pf-pending-body {
+    color: var(--c-text-muted);
+    font-size: 0.82rem;
+    line-height: 1.8;
+    margin-bottom: 1rem;
+  }
+  .pf-pending-return {
+    color: var(--c-text-dim);
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 2rem;
+  }
+  .pf-start-over {
+    display: block;
+    margin: 1.25rem auto 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--f-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--c-text-dim);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color var(--t-fast);
+  }
+  .pf-start-over:hover { color: var(--c-text-muted); }
+  .pf-pending-banner { margin-top: 3rem; }
+
+  /* Collage */
+  .pf-collage-section { max-width: 900px; margin-inline: auto; }
+  .pf-collage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .pf-collage-heading {
+    font-family: var(--f-serif);
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    font-weight: 300;
+    margin-bottom: 0.25rem;
+  }
+  .pf-limit-label {
+    font-family: var(--f-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--c-text-muted);
+  }
+  .pf-selected-count {
+    font-family: var(--f-mono);
+    font-size: 0.7rem;
+    color: var(--c-accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .pf-hint {
+    font-family: var(--f-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    color: var(--c-text-dim);
+    margin-bottom: 1rem;
+  }
+
+  .pf-auth-notice {
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    line-height: 1.7;
+    color: #d1b27a;
+    padding: 0.8rem 1rem;
+    border: 1px solid rgba(200, 169, 122, 0.35);
+    background: rgba(200, 169, 122, 0.06);
+    margin-bottom: 1.25rem;
+  }
+
+  .pf-collage {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 2rem;
+  }
+  @media (max-width: 640px) { .pf-collage { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 900px) { .pf-collage { grid-template-columns: repeat(4, 1fr); } }
+
+  .pf-photo {
+    all: unset;
+    display: block;
+    position: relative;
+    cursor: pointer;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: var(--c-bg-2);
+    border: 1px solid var(--c-border);
+    transition: border-color var(--t-fast), transform var(--t-fast);
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .pf-photo:hover { border-color: rgba(200, 169, 122, 0.35); }
+  .pf-photo:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
+
+  .pf-photo-frame {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .pf-photo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: contrast(0.94) saturate(0.9);
+    transition: filter var(--t-mid), transform var(--t-mid);
+    -webkit-user-drag: none;
+    pointer-events: none;
+  }
+
+  .pf-photo-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.55) 100%);
+    opacity: 0;
+    transition: opacity var(--t-fast);
+    pointer-events: none;
+  }
+
+  .pf-photo-check {
+    position: absolute;
+    inset: auto 0.5rem 0.5rem auto;
+    width: 1.6rem;
+    height: 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--c-accent);
+    color: var(--c-bg);
+    border-radius: 50%;
+    transform: scale(0);
+    transition: transform 220ms var(--ease-out);
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(200, 169, 122, 0.35);
+  }
+  .pf-photo-check svg { width: 60%; height: 60%; }
+
+  .pf-photo--selected {
+    border-color: var(--c-accent);
+    transform: scale(0.97);
+  }
+  .pf-photo--selected .pf-photo-img { filter: contrast(1) saturate(1); }
+  .pf-photo--selected .pf-photo-overlay { opacity: 1; }
+  .pf-photo--selected .pf-photo-check { transform: scale(1); }
+
+  .pf-photo--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .pf-photo--locked { cursor: default; }
+
+  .pf-banner-wrap { margin: 2.5rem 0; }
+
+  .pf-verify-reminder {
+    color: var(--c-text-dim);
+    font-family: var(--f-mono);
+    font-size: 0.65rem;
+    line-height: 1.7;
+    letter-spacing: 0.02em;
+    padding: 0.9rem 1rem;
+    border-left: 2px solid var(--c-accent);
+    background: rgba(200, 169, 122, 0.04);
+    margin-bottom: 1.5rem;
+  }
+
+  .btn--save {
+    display: block;
+    width: 100%;
+    padding: 1rem 1.5rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+  }
+  .btn--save:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  /* Saved (final) */
+  .pf-saved {
+    text-align: center;
+    max-width: 34rem;
+    margin-inline: auto;
+    padding-top: 2rem;
+  }
+  .pf-saved-check {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--c-accent);
+    color: var(--c-bg);
+    font-size: 2rem;
+    line-height: 1;
+    margin: 0 auto 2rem;
+    animation: pf-check-in 480ms var(--ease-out);
+  }
+  @keyframes pf-check-in {
+    from { transform: scale(0.4); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+  .pf-saved-heading {
+    font-family: var(--f-serif);
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 300;
+    margin-bottom: 1rem;
+  }
+  .pf-saved-body {
+    color: var(--c-text-muted);
+    font-size: 0.85rem;
+    line-height: 1.8;
+    margin-bottom: 1rem;
+  }
+  .pf-saved-locked {
+    color: var(--c-text-dim);
+    font-family: var(--f-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 2.5rem;
+  }
+  .pf-saved-banner { margin-top: 2rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pf-pending-icon { animation: none; }
+  }
+</style>
